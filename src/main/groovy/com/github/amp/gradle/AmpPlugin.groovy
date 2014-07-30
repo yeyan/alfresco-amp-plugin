@@ -12,19 +12,6 @@ class AmpPlugin implements Plugin<Project> {
         configurePlugins(project)
         configureAmpTask(project)
 
-        project.task('hello') << {
-
-            def props = moduleProperties(project);
-
-
-            println project.buildDir
-
-            println props
-
-            println "";
-            println "${project.amp.baseName}:${project.amp.destinationDir}:${project.amp.archivePath}";
-        }
-
     }
 
     void configureAmpTask(Project project) {

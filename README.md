@@ -28,7 +28,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath group: 'com.github.amp', name: 'amp-plugin', version: '1.0-SNAPSHOT'
+        classpath group: 'com.parashift.amp', name: 'amp-plugin', version: '1.0-SNAPSHOT'
     }
 }
 
@@ -36,7 +36,7 @@ apply-plugin: 'alfresco-amp'
 
 amp {
     // id is mandatory when you want to pack a AMP
-    id = "com.github.amp"  
+    id = "com.parashift.amp"  
 
     // the following is options but highly recommended you fill yourself
     // as the plugin just infer the values from project.version 

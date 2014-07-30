@@ -50,7 +50,7 @@ class AmpPlugin implements Plugin<Project> {
             createDirectoryIfNotExist(libDir, "Can not create lib directory in AMP")
 
             project.amp.libDirs.findAll { it.exists() }.each { file ->
-                println "file = $file, ${file.class}"
+                //println "file = $file, ${file.class}"
 
                 ant.copy (toDir: libDir, flatten: true) {
                     fileset (dir: file.absolutePath) {

@@ -1,4 +1,4 @@
-package com.github.amp.gradle
+package com.parashift.amp.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project

@@ -16,7 +16,7 @@ dependencies {
     // testCompile 'junit:junit:4.11'
 }
 
-group = 'com.github.amp'
+group = 'com.parashift.amp'
 version = '1.0-SNAPSHOT'
 
 publishing {

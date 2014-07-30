@@ -14,7 +14,9 @@ git clone https://github.com/yeyan/alfresco-amp-plugin.git
 
 cd amp-plugin
 
-gradle publish # this installs the plugin into your local maven repository, you can change the build.gradle to install into anther location
+# this installs the plugin into your local maven repository, 
+# you can change the build.gradle to install into anther location
+gradle publish 
 ```
 
 Then in you build script add the following:

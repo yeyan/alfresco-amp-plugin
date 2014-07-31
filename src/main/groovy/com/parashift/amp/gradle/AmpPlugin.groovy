@@ -204,6 +204,11 @@ class AmpExtension {
     def String title
     def String description
 
+    def setVersion(String vers) {
+        this.version = vers
+        updateArchivePath()
+    }
+
     def setDestinationDir(File dir) {
         this.destinationDir = dir
         updateArchivePath()

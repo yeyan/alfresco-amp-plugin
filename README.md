@@ -72,3 +72,14 @@ After all that you can pack you project into AMP file by issue
 gradle amp
 
 ```
+
+gradle project group
+--------------------
+
+Alfresco AMP plugin can be also used with gradle project groups. But with the following limitations:
+
+1. properties like id, alias, title, description will be ignored on subprojects,
+   dependencies and extra libraries can be configured in subprojects as normal.
+
+2. AMP file can be only packed with root project. Issuing amp command in subprojects will
+   not deliver any AMP file

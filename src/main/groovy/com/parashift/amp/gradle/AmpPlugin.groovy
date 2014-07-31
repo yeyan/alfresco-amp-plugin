@@ -58,7 +58,9 @@ class AmpPlugin implements Plugin<Project> {
             // only generate module.properties for root project
             if(isRootProject) {
                 project.subprojects { subproj ->
-                    project.amp.dependencies.addAll(subproj.amp.dependencies)
+                    if(subproj.amp.dependencies) {
+                        project.amp.dependencies.addAll(subproj.amp.dependencies)
+                    }
                 }
 
                 project.amp.dependencies = project.amp.dependencies.unique { a, b -> 

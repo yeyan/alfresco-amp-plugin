@@ -7,43 +7,71 @@ import org.gradle.tooling.BuildException
 
 class AmpPlugin implements Plugin<Project> {
     void apply(Project project) {
+        applyPlugin(project)
+    }
 
+    void applyPlugin(Project project) {
         configureExtensions(project)
         configurePlugins(project)
         configureAmpTask(project)
-
     }
 
     void configureAmpTask(Project project) {
+        println "is root project = ${project.rootProject == project}"
+
         def task = project.tasks.create("amp");
         task.dependsOn("build")
 
-        task.ext.buildDir = new File(new File(project.buildDir, "tmp"), "amp")
+        task.ext.isRootProject = project.rootProject == project
 
-        task.ext.moduleProperties = new File(task.ext.buildDir, "module.properties")
-        task.ext.fileMapping = new File(task.ext.buildDir, "file-mapping.properties")
+        if(task.ext.isRootProject) {
+            project.subprojects { subproj ->
+                applyPlugin(subproj)
+                task.dependsOn(":${subproj.name}:amp")
+            }
+        }
 
-        task.ext.bundleDir = new File(task.ext.buildDir, "bundle")
-        task.ext.libDir = new File(task.ext.buildDir, "lib")
+        configureTaskExt(project, task.ext)
 
         task << {
+            println "amp task from ${project.name}, isRoot = $isRootProject"
+
+            def copyJarFiles = { fromDir , toDir ->
+                if(fromDir.exists()) {
+
+                    if(!toDir.exists()) {
+                        toDir.mkdirs()
+                    }
+
+                    ant.copy (toDir: toDir, flatten: true) {
+                        fileset (dir: fromDir) {
+                            include (name: "**/*jar")
+                        }
+                    }
+                }
+            }
+
             // create build directory
             createDirectoryIfNotExist(buildDir, "Can not create AMP build directory")
 
-            // generate module.properties
-            createModuleProperties(project, moduleProperties)
+            // only generate module.properties for root project
+            if(isRootProject) {
+                project.subprojects { subproj ->
+                    project.amp.dependencies.addAll(subproj.amp.dependencies)
+                }
+
+                project.amp.dependencies = project.amp.dependencies.unique { a, b -> 
+                    a.id.compareTo(b.id)
+                }
+
+                createModuleProperties(project, moduleProperties)
+            }
 
             // create lib directory
             createDirectoryIfNotExist(libDir, "Can not create lib directory in AMP")
 
-            project.amp.libDirs.findAll { it.exists() }.each { file ->
-                //println "file = $file, ${file.class}"
-
-                ant.copy (toDir: libDir, flatten: true) {
-                    fileset (dir: file.absolutePath) {
-                        include (name: "**/*jar")
-                    }
-                }
+            project.amp.libDirs.findAll { it.exists() }.each { dir ->
+                copyJarFiles(dir, libDir)
             }
 
             if (isBundleBased(project)) {
@@ -55,8 +83,20 @@ class AmpPlugin implements Plugin<Project> {
                 ant.copy (file: project.jar.archivePath, todir: libDir)
             }
 
+            // copy jar files from subproject's amp lib and bundle directory
+            if(isRootProject) {
+                project.subprojects { subproj ->
+                    def subAmp = configureTaskExt(subproj, [:])
+
+                    copyJarFiles(subAmp.libDir, libDir)
+                    copyJarFiles(subAmp.bundleDir, bundleDir)
+                }
+            }
+
             // pack the amp
-            ant.zip(destfile: project.amp.archivePath, basedir: buildDir, update: true)
+            if(isRootProject) {
+                ant.zip(destfile: project.amp.archivePath, basedir: buildDir, update: true)
+            }
         }
 
     }
@@ -76,6 +116,20 @@ class AmpPlugin implements Plugin<Project> {
 
     void configurePlugins(Project project) {
         project.apply plugin: "java"
+    }
+
+    def configureTaskExt(project, ext) {
+        ext.buildDir = new File(new File(project.buildDir, "tmp"), "amp")
+
+        ext.moduleProperties = new File(ext.buildDir, "module.properties")
+        ext.fileMapping = new File(ext.buildDir, "file-mapping.properties")
+
+        ext.bundleDir = new File(ext.buildDir, "bundle")
+        ext.libDir = new File(ext.buildDir, "lib")
+
+        ext.subdirs = [bundleDir, libDir]
+
+        return ext
     }
 
     void createModuleProperties(Project project, File file) {
@@ -122,6 +176,7 @@ class AmpPlugin implements Plugin<Project> {
 
         return result
     }
+
 }
 
 class AmpExtension {

@@ -1,3 +1,7 @@
+/*
+ * @Author Ye Yan (ye.yan@parashift.com.au)
+ */
+
 package com.parashift.amp.gradle
 
 import org.gradle.api.Plugin
